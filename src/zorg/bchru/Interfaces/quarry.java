@@ -75,7 +75,7 @@ public class quarry {
         
         return GuildID;
         
-        public void getGuildIDfromPlayerName(String s) throws SQLException{
+        public GuildID getGuildIDfromPlayerName(String s) throws SQLException{
             Player P = p;
             ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where Name='"+p.getName().toString()+"'");
             String GuildID = "";
@@ -87,8 +87,13 @@ public class quarry {
             return GuildID;
     }
     public boolean sendMessagetoGuild(Player p, String s) throws SQLException {
-        stmt.execute("Select * from Guild");
-        return true;
+            String GuildID = getGuildIDfromPlayerID(p.getUUID().toString());
+            ResultSet PlayerListofGuild = stmt.execute("Select * from Users Where GuildID='"+GuildID+"'");
+            while(PlayerListofGuild.next()) {
+                Player Target = Spigot.getInstance().getPlayer.getByID(PlayerListofGuild.getString("UUID"));
+                Target.sendMessage(ChatColor.GREEN + "Guild >: " p.getName().toString().toupperCase()+ " :< " +ChatColor.ORANGE + " :>" + s));
+            }
+            return true;
     }
 
 }
