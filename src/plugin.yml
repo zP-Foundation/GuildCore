@@ -1,0 +1,26 @@
+## YAML Template.
+---
+
+name: GuildCore
+version: 1
+load: POSTWORLD
+api-version: 1.17
+author: Bchru
+main: main.GuildCore
+database: true
+
+commands:
+  guild:
+  g:
+  ginvite:
+  gaccept:
+  gcreate:
+  gleave:
+  ginfo:
+  ginfo2:
+  gjoin:
+    permission: guildcore.admin
+  gpromote:
+  grename:
+  gmotd:
+  glist:
