@@ -55,18 +55,40 @@ public class quarry {
     }
     public boolean droptables() throws SQLException {
         try {console.echo("Dropping all Tables");
-        stmt.execute("DROP TABLE "+prefix+"Boop, "+prefix+"JoinMessages, "+prefix+"Guilds, "+prefix+"Users, "+prefix+"Invites, "+prefix+"Ranks");
-        return true;
+            stmt.execute("DROP TABLE "+prefix+"Boop, "+prefix+"JoinMessages, "+prefix+"Guilds, "+prefix+"Users, "+prefix+"Invites, "+prefix+"Ranks");
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(GuildCore_2.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
-    public String getGuild(Player p){
-        ResultSet GuildsData = stmt.executeQuery("SELECT * from Guild")
+    public void getGuildIDfromPlayer(Player p) throws SQLException{
+        Player P = p;
+        ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where UUID='"+p.getUUID().toString()+"'");
+        String GuildID = "";
+        if!(!GuildsData.next()){
+            GuildID = GuildsData.getString("GuildID");
+        } else {
+            GuildID = "-1";
+        }
+    }
+        
+        return GuildID;
+        
+        public void getGuildIDfromPlayerName(String s) throws SQLException{
+            Player P = p;
+            ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where Name='"+p.getName().toString()+"'");
+            String GuildID = "";
+            if!(!GuildsData.next()){
+                GuildID = GuildsData.getString("GuildID");
+            } else {
+                GuildID = "-1";
+            }
+            return GuildID;
     }
     public boolean sendMessagetoGuild(Player p, String s) throws SQLException {
-        stmt.executeQuery("Select * from Guild")
+        stmt.execute("Select * from Guild");
+        return true;
     }
 
 }

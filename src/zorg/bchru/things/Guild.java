@@ -11,8 +11,6 @@ public class Guild {
     static Player[] Members = new Player[1337];
     static quarry qu;
 
-
-
     public void init(quarry Qu){
         qu = Qu;
     }
