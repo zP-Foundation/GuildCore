@@ -1,15 +1,14 @@
 package zorg.bchru.Interfaces;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import zorg.bchru.GuildCore_2;
 import zorg.bchru.utils.console;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,24 +61,24 @@ public class quarry {
         }
         return false;
     }
-    public void getGuildIDfromPlayer(Player p) throws SQLException{
+    public String getGuildIDfromPlayer(Player p) throws SQLException{
         Player P = p;
-        ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where UUID='"+p.getUUID().toString()+"'");
+        ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where UUID='"+p.getUniqueId().toString()+"'");
         String GuildID = "";
-        if!(!GuildsData.next()){
+        if(!GuildsData.next()){
             GuildID = GuildsData.getString("GuildID");
         } else {
             GuildID = "-1";
         }
-    }
-        
         return GuildID;
+    }
+
         
-        public GuildID getGuildIDfromPlayerName(String s) throws SQLException{
-            Player P = p;
-            ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where Name='"+p.getName().toString()+"'");
+        public String getGuildIDfromPlayerName(String s) throws SQLException{
+
+            ResultSet GuildsData = stmt.executeQuery("SELECT * from Users where Name='"+s+"'");
             String GuildID = "";
-            if!(!GuildsData.next()){
+            if(!GuildsData.next()){
                 GuildID = GuildsData.getString("GuildID");
             } else {
                 GuildID = "-1";
@@ -87,11 +86,15 @@ public class quarry {
             return GuildID;
     }
     public boolean sendMessagetoGuild(Player p, String s) throws SQLException {
-            String GuildID = getGuildIDfromPlayerID(p.getUUID().toString());
-            ResultSet PlayerListofGuild = stmt.execute("Select * from Users Where GuildID='"+GuildID+"'");
+            String GuildID = getGuildIDfromPlayer(p);
+            ResultSet PlayerListofGuild = stmt.executeQuery("Select * from Users Where GuildID='"+GuildID+"'");
             while(PlayerListofGuild.next()) {
-                Player Target = Spigot.getInstance().getPlayer.getByID(PlayerListofGuild.getString("UUID"));
-                Target.sendMessage(ChatColor.GREEN + "Guild >: " p.getName().toString().toupperCase()+ " :< " +ChatColor.ORANGE + " :>" + s));
+                for(Player op :  Bukkit.getOnlinePlayers()){
+                    if(op.getUniqueId().toString() == PlayerListofGuild.getString("UUID")){
+                        op.sendMessage(ChatColor.GREEN + "Guild >: "+p.getName().toString().toUpperCase()+ " :< " +ChatColor.YELLOW + " :>" + s);
+
+                    }
+                }
             }
             return true;
     }
