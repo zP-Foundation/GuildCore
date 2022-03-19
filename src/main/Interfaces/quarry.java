@@ -19,7 +19,8 @@ public class quarry {
     static Statement stmt;
     static Connection conn;
     public static FileConfiguration config;
-    static String prefix = "GuildCore_";
+    static String prefix = "";
+    //static String prefix = "GuildCore_";
 
 
     public boolean init() throws SQLException {
@@ -62,13 +63,14 @@ public class quarry {
         return false;
     }
     public String getGuildIDfromPlayer(Player p) throws SQLException{
-        Player P = p;
-        ResultSet GuildsData = stmt.executeQuery("SELECT * from "+prefix+"Users where UUID='"+p.getUniqueId().toString()+"'");
         String GuildID = "";
-        if(GuildsData.next()){
-            GuildID = GuildsData.getString("GuildID");
-        } else {
+
+        ResultSet GuildsData = stmt.executeQuery("SELECT * from "+prefix+"Users where UUID='"+p.getUniqueId().toString()+"'");
+
+        if(!GuildsData.next()){
             GuildID = "-1";
+        } else {
+            GuildID = GuildsData.getString("GuildID");
         }
         return GuildID;
     }
@@ -85,14 +87,21 @@ public class quarry {
         }
         return GuildID;
     }
-    public boolean sendMessagetoGuild(Player p, String s) throws SQLException {
+    public boolean sendMessagetoGuild(Player p, String[] args) throws SQLException {
         String GuildID = getGuildIDfromPlayer(p);
+        console.echo("GuildID: " + GuildID);
         if(GuildID == "-1"){
-            p.sendMessage("You need to join a guild to use guild chat");
+            p.sendMessage("You need to join a guild to use guild chat#");
         }
         ResultSet PlayerListofGuild = stmt.executeQuery("Select * from "+prefix+"Users Where GuildID='"+GuildID+"'");
 
+        String s = "";
+        for(String arg : args){
+            s = s + arg;
+        }
+
         while(PlayerListofGuild.next()) {
+            console.echo("Sending Message");
             for(Player op :  Bukkit.getOnlinePlayers()){
                 if(op.getUniqueId().toString() == PlayerListofGuild.getString("UUID")){
                     op.sendMessage(ChatColor.GREEN + "Guild >: "+p.getName().toString().toUpperCase()+ " :< " +ChatColor.YELLOW + " :>" + s);
@@ -101,6 +110,9 @@ public class quarry {
             }
         }
         return true;
+    }
+    public void displayGuildMainInfo(Player p){
+
     }
 
 }

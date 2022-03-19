@@ -5,20 +5,23 @@
  */
 package main;
 
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.Statement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import main.connection.functions;
+import main.utils.c;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +30,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.bukkit.Bukkit.getPlayer;
-/**
- *
- * @author Swere
- */
+
 public class GuildCore extends JavaPlugin implements Listener {
     
     public List<String> guildchat = new ArrayList<String>();
     
     public String host, port, database, username, password;
-    static MysqlDataSource data = new MysqlDataSource();
+    //static MysqlDataSource data = new MysqlDataSource();
     static Statement stmt;
     static Connection conn;
     
@@ -57,19 +57,23 @@ public class GuildCore extends JavaPlugin implements Listener {
             //data.setServerName("localhost");
             //data.setPort(3306);
             //data.setDatabaseName("GuildCore");
-            getLogger().info("Database connected");
-            
+
         
         try {
-            //conn = (Connection) data.getConnection();
-            //stmt = (Statement) conn.createStatement();
+            ////conn = (Connection) data.getConnection();
+            ////stmt = (Statement) conn.createStatement();
             String Address = "localhost";
             String Database = "mc_Autumn";
             String DatabaseUser = "Autumn";
             String DatabaseUserPassword = "Hihihi45";
-            conn = (Connection) DriverManager.getConnection("jdbc:mysql://" + Address + "/" + Database, DatabaseUser, DatabaseUserPassword);
 
+            conn = DriverManager.getConnection("jdbc:mysql://" + Address + "/" + Database, DatabaseUser, DatabaseUserPassword);
             stmt = (Statement) conn.createStatement();
+
+
+            //stmt = (Statement) functions.getStatement();
+            getLogger().info("Database connected");
+
                 //stmt.execute("CREATE TABLE IF NOT EXISTS Guilds (GuildID int PRIMARY KEY NOT NULL AUTO_INCREMENT, GuildName varchar(255), Owner varchar(255),Motd TEXT, created timestamp DEFAULT CURRENT_TIMESTAMP)");
                 //stmt.execute("CREATE TABLE IF NOT EXISTS Users (ID int PRIMARY KEY NOT NULL AUTO_INCREMENT, UUID varchar(255), GuildID int, GuildRank int, Name varchar(255), invitedTime timestamp DEFAULT CURRENT_TIMESTAMP)");
                 //stmt.execute("CREATE TABLE IF NOT EXISTS Invites (ID int PRIMARY KEY NOT NULL AUTO_INCREMENT, Inviter varchar(255), Target varchar(255), GuildID int, ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)");
@@ -96,13 +100,7 @@ public class GuildCore extends JavaPlugin implements Listener {
     }
     @Override
     public boolean onCommand(CommandSender interpreter, Command cmd, String input, String[] args){
-        
-        try {
-            conn = (Connection) data.getConnection();
-            stmt = (Statement) conn.createStatement();
-        } catch (SQLException ex) {
-            Logger.getLogger(GuildCore.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
             if (!input.equalsIgnoreCase(input)){
                 
                 input = input.toLowerCase();
@@ -117,7 +115,8 @@ public class GuildCore extends JavaPlugin implements Listener {
                 if (args.length >= 0) {
                     try {
                         zorg.bchru.Interfaces.quarry querry = new zorg.bchru.Interfaces.quarry();
-                        querry.sendMessagetoGuild(player, args.toString());
+                        querry.init();
+                        querry.sendMessagetoGuild(player, args);
                         return true;
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -576,25 +575,29 @@ public class GuildCore extends JavaPlugin implements Listener {
                         if(GuildInfo.next()){
                             //player.sendMessage("GuildID = >>"+GuildID+"<<");
 
+                            //ResultSet PlayerInfo = stmt.executeQuery("SELECT * FROM Users WHERE UUID ='"+GuildInfo.getString("Owner")+"'");
+
+                           // PlayerInfo.next();
+                            String cg = ChatColor.GOLD + "";
+                            String cy = ChatColor.YELLOW + "";
+                            String cgm = ChatColor.GOLD + "" + ChatColor.MAGIC;
+
+                            Messages.add(cgm  + c.repeat(32,"~"));
+                            Messages.add(cgm + "####### " + ChatColor.GREEN + "Your Guild Info"+cgm+" #######");
+                            Messages.add(cgm + "#######  "+ChatColor.DARK_GREEN + "<<<" + GuildInfo.getString("GuildName") + ">>>  "+cgm+"#######");
+                            Messages.add(cgm + "#####" +ChatColor.ITALIC +""+ ChatColor.GRAY  + "| Founded at: "+GuildInfo.getString("created")+"|" + cgm+ "#####");
+                            Messages.add(cg + "News: " + GuildInfo.getString("Motd"));
+                            Messages.add(cgm  + c.repeat(32,"~"));
                             
-                            Messages.add(ChatColor.GREEN + "Your Guild Overview");
-                            Messages.add(ChatColor.MAGIC + "Guild: "+ ChatColor.GREEN + "<<<" + GuildInfo.getString("GuildName") + ">>>");
-                            Messages.add(ChatColor.GRAY + "| Created at: "+GuildInfo.getString("created"));
-                            Messages.add(ChatColor.GREEN + "Motd: " + GuildInfo.getString("Motd"));
-                            
-                            ResultSet PlayerInfo = stmt.executeQuery("SELECT * FROM Users WHERE UUID ='"+GuildInfo.getString("Owner")+"'");
-                            PlayerInfo.next();
-                            
-                            
-                            Messages.add("######Users#######");
+                            Messages.add(ChatColor.GOLD +"######Users#######");
                             
 
-                            ResultSet PlayersinGuild = stmt.executeQuery("SELECT * FROM Users INNER JOIN Ranks ON Users.GuildRank = Ranks.RankID WHERE GuildID = "+GuildID+" ORDER BY Users.GuildRank DESC");
+                            ResultSet PlayersinGuild = stmt.executeQuery("SELECT * FROM Users JOIN Ranks ON Ranks.RankID = Users.GuildRank WHERE GuildID = "+GuildID);
                             //Get All the Players from a Guild
                             int Playercount = 0;
                             while(PlayersinGuild.next()){
                                 Playercount++;
-                                Messages.add(ChatColor.DARK_GREEN+"|<"+PlayersinGuild.getString("Name")+">| : |<"+PlayersinGuild.getString("RankName")+">|");
+                                Messages.add(ChatColor.YELLOW+"|"+PlayersinGuild.getString("RankName")+"| "+ChatColor.BLACK+":"+ChatColor.GOLD+" |<"+PlayersinGuild.getString("Name")+">|");
                             }
                             
                         } else {
